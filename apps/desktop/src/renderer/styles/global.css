@@ -1,0 +1,58 @@
+:root {
+  --ch-bg-base: #1e1e1e;
+  --ch-bg-elevated: #252526;
+  --ch-bg-panel: #2d2d30;
+  --ch-bg-input: #3c3c3c;
+  --ch-bg-hover: #2a2d2e;
+  --ch-bg-active: #37373d;
+  --ch-border: #3e3e42;
+  --ch-border-focus: #007fd4;
+  --ch-text-primary: #cccccc;
+  --ch-text-secondary: #9d9d9d;
+  --ch-text-muted: #6e6e6e;
+  --ch-accent: #3794ff;
+  --ch-accent-hover: #4aa3ff;
+  --ch-accent-muted: rgba(55, 148, 255, 0.15);
+  --ch-success: #4ec9b0;
+  --ch-success-bg: rgba(78, 201, 176, 0.12);
+  --ch-warning: #cca700;
+  --ch-warning-bg: rgba(204, 167, 0, 0.12);
+  --ch-danger: #f48771;
+  --ch-font-sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --ch-font-mono: "Cascadia Code", Consolas, monospace;
+  --ch-sidebar: 220px;
+  --ch-list: 280px;
+  --ch-titlebar: 36px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  font-family: var(--ch-font-sans);
+  font-size: 14px;
+  color: var(--ch-text-primary);
+  background: var(--ch-bg-base);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+input,
+textarea,
+.preview-editor {
+  user-select: text;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: var(--ch-accent);
+}

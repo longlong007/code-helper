@@ -1,0 +1,56 @@
+{
+  "name": "coding-helper",
+  "displayName": "Coding Helper",
+  "description": "Push IDE context to Coding Helper desktop app",
+  "version": "0.1.0",
+  "publisher": "coding-helper",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "codingHelper.connect",
+        "title": "Coding Helper: Connect"
+      },
+      {
+        "command": "codingHelper.pushContext",
+        "title": "Coding Helper: Push Context"
+      }
+    ],
+    "configuration": {
+      "title": "Coding Helper",
+      "properties": {
+        "codingHelper.port": {
+          "type": "number",
+          "default": 0,
+          "description": "Desktop bridge port (0 = auto from pairing)"
+        },
+        "codingHelper.token": {
+          "type": "string",
+          "default": "",
+          "description": "Pairing token from desktop app"
+        },
+        "codingHelper.autoPush": {
+          "type": "boolean",
+          "default": false,
+          "description": "Auto push context on selection change"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.10",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.2.1",
+    "typescript": "^5.7.2"
+  }
+}

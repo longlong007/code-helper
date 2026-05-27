@@ -1,0 +1,139 @@
+.settings-view {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-view__back {
+  padding: 4px 12px;
+}
+
+.settings-layout {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.settings-nav {
+  width: 180px;
+  border-right: 1px solid var(--ch-border);
+  padding: 8px;
+}
+
+.settings-nav button {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--ch-text-secondary);
+  font-size: 13px;
+  text-align: left;
+}
+
+.settings-nav__active,
+.settings-nav button:hover {
+  background: var(--ch-bg-hover);
+  color: var(--ch-accent);
+}
+
+.settings-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.settings-content h3 {
+  margin: 0 0 16px;
+  font-size: 15px;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #454545;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--ch-text-muted);
+  margin-top: 4px;
+}
+
+.toggle {
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  border: 1px solid var(--ch-border);
+  background: var(--ch-bg-input);
+  position: relative;
+}
+
+.toggle--on {
+  background: var(--ch-accent);
+  border-color: var(--ch-accent);
+}
+
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.12s;
+}
+
+.toggle--on::after {
+  transform: translateX(18px);
+}
+
+.opacity-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.pairing-box {
+  margin-top: 16px;
+}
+
+.pairing-token {
+  font-family: var(--ch-font-mono);
+  font-size: 22px;
+  letter-spacing: 0.12em;
+  text-align: center;
+  padding: 16px;
+  border: 1px dashed var(--ch-accent);
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.provider-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #454545;
+  font-size: 13px;
+}
+
+.api-key-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.api-key-row input {
+  flex: 1;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--ch-border);
+  border-radius: 6px;
+  background: var(--ch-bg-input);
+  color: var(--ch-text-primary);
+}
