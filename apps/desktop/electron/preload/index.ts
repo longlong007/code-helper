@@ -37,8 +37,10 @@ const api = {
     ipcRenderer.on("context-updated", handler);
     return () => ipcRenderer.removeListener("context-updated", handler);
   },
-  onFloatBallMenuChange: (cb: (open: boolean) => void) => {
-    const handler = (_: unknown, open: boolean) => cb(open);
+  onFloatBallMenuChange: (
+    cb: (payload: { open: boolean; placement?: string }) => void
+  ) => {
+    const handler = (_: unknown, payload: { open: boolean; placement?: string }) => cb(payload);
     ipcRenderer.on("float-ball-menu", handler);
     return () => ipcRenderer.removeListener("float-ball-menu", handler);
   },

@@ -1,5 +1,13 @@
 declare global {
   interface Window {
+    __syncFloatBallMenuLayout?: (payload: {
+      open: boolean;
+      layout?: {
+        placement: string;
+        ballOffset: { x: number; y: number };
+        menuTop: number;
+      };
+    }) => void;
     codingHelper: {
       getSettings: () => Promise<Record<string, unknown>>;
       setSettings: (patch: Record<string, unknown>) => Promise<Record<string, unknown>>;
@@ -29,7 +37,14 @@ declare global {
       toggleQuickMenu: (ballScreen?: { x: number; y: number }) => Promise<void>;
       setFloatBallMenuOpen: (open: boolean, ballScreen?: { x: number; y: number }) => Promise<void>;
       closeQuickMenu: () => Promise<void>;
-      onFloatBallMenuChange: (cb: (open: boolean) => void) => () => void;
+      onFloatBallMenuChange: (
+        cb: (payload: {
+          open: boolean;
+          placement?: string;
+          ballOffset?: { x: number; y: number };
+          menuTop?: number;
+        }) => void
+      ) => () => void;
       showFloatBall: () => Promise<void>;
       getFloatBallPosition: () => Promise<{ x: number; y: number } | null>;
       setFloatBallPosition: (x: number, y: number) => Promise<{ x: number; y: number } | null>;

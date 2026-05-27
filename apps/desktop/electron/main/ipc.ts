@@ -177,9 +177,9 @@ export function registerIpc(): void {
 
   ipcMain.handle(
     "set-float-ball-menu-open",
-    (e, open: boolean, ballScreen?: { x: number; y: number }) => {
+    async (e, open: boolean, ballScreen?: { x: number; y: number }) => {
       const ball = BrowserWindow.fromWebContents(e.sender);
-      setFloatBallMenuOpen(open, ball, ballScreen);
+      await setFloatBallMenuOpen(open, ball, ballScreen);
     }
   );
 
