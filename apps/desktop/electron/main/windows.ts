@@ -17,8 +17,8 @@ let quickMenuWindow: BrowserWindow | null = null;
 
 const FLOAT_BALL_SIZE = 52;
 const SNAP_THRESHOLD = 48;
-const QUICK_MENU_WIDTH = 280;
-const QUICK_MENU_HEIGHT = 320;
+const QUICK_MENU_WIDTH = 480;
+const QUICK_MENU_HEIGHT = 340;
 const QUICK_MENU_GAP = 8;
 const WORK_MARGIN = 8;
 const FLOAT_BALL_EXPANDED_HEIGHT = QUICK_MENU_HEIGHT + QUICK_MENU_GAP + FLOAT_BALL_SIZE;
