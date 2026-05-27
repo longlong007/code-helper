@@ -266,6 +266,7 @@ export function setFloatBallMenuOpen(
   win.setBounds({ x, y, width: QUICK_MENU_WIDTH, height: FLOAT_BALL_EXPANDED_HEIGHT });
   win.setResizable(false);
   win.webContents.send("float-ball-menu", true);
+  win.focus();
 }
 
 export function toggleQuickMenu(ballScreen?: { x: number; y: number }): void {

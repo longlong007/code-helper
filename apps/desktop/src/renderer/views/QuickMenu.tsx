@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { PromptTemplate, StageId } from "@coding-helper/shared";
 import { STAGES } from "@coding-helper/shared";
 import "./QuickMenu.css";
@@ -27,6 +27,7 @@ export default function QuickMenu({ inline = false }: { inline?: boolean }) {
   const [templates, setTemplates] = useState<PromptTemplate[]>(MOCK_TEMPLATES);
   const [selectedStageId, setSelectedStageId] = useState<StageId>("requirements");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState(0);
 
   useEffect(() => {
     if (!inline) document.body.style.background = "transparent";
@@ -55,19 +56,91 @@ export default function QuickMenu({ inline = false }: { inline?: boolean }) {
 
   const stagePrompts = templatesByStage.get(selectedStageId) ?? [];
 
-  const openTemplate = async (id: string) => {
-    await window.codingHelper.pushRecent(id);
-    await window.codingHelper.openMain();
-    window.codingHelper.closeQuickMenu();
-  };
+  useEffect(() => {
+    setFocusedIndex(0);
+  }, [selectedStageId]);
 
-  const copyTemplate = async (t: PromptTemplate) => {
+  useEffect(() => {
+    setFocusedIndex((i) => (stagePrompts.length === 0 ? 0 : Math.min(i, stagePrompts.length - 1)));
+  }, [stagePrompts.length]);
+
+  const copyTemplate = useCallback(async (t: PromptTemplate) => {
     const rendered = await window.codingHelper.renderPrompt(t.id);
     const text = rendered?.body || t.body || t.title;
     await window.codingHelper.copyText(text);
     await window.codingHelper.pushRecent(t.id);
     setCopiedId(t.id);
     setTimeout(() => setCopiedId((id) => (id === t.id ? null : id)), 1500);
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      const stageIdx =
+        e.altKey && !e.ctrlKey && !e.metaKey && e.key >= "1" && e.key <= "7"
+          ? Number(e.key) - 1
+          : -1;
+      if (stageIdx >= 0 && stageIdx < STAGES.length) {
+        e.preventDefault();
+        setSelectedStageId(STAGES[stageIdx].id);
+        return;
+      }
+
+      const digit = e.key >= "1" && e.key <= "9" ? Number(e.key) - 1 : -1;
+      if (digit >= 0 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const t = stagePrompts[digit];
+        if (t) {
+          e.preventDefault();
+          void copyTemplate(t);
+        }
+        return;
+      }
+
+      if (e.key === "ArrowDown" && stagePrompts.length > 0) {
+        e.preventDefault();
+        setFocusedIndex((i) => Math.min(i + 1, stagePrompts.length - 1));
+        return;
+      }
+
+      if (e.key === "ArrowUp" && stagePrompts.length > 0) {
+        e.preventDefault();
+        setFocusedIndex((i) => Math.max(i - 1, 0));
+        return;
+      }
+
+      if (e.key === "Enter" && !e.shiftKey && !e.altKey) {
+        const t = stagePrompts[focusedIndex];
+        if (t) {
+          e.preventDefault();
+          void copyTemplate(t);
+        }
+        return;
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
+        const t = stagePrompts[focusedIndex];
+        if (t) {
+          e.preventDefault();
+          void copyTemplate(t);
+        }
+        return;
+      }
+
+      if (e.key === "Escape") {
+        e.preventDefault();
+        void window.codingHelper.closeQuickMenu();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [stagePrompts, focusedIndex, copyTemplate]);
+
+  const openTemplate = async (id: string) => {
+    await window.codingHelper.pushRecent(id);
+    await window.codingHelper.openMain();
+    window.codingHelper.closeQuickMenu();
   };
 
   return (
@@ -76,7 +149,7 @@ export default function QuickMenu({ inline = false }: { inline?: boolean }) {
         <div className="quick-menu__header">提示词</div>
         <div className="quick-menu__columns">
           <nav className="quick-menu__stages" aria-label="研发阶段">
-            {STAGES.map((stage) => {
+            {STAGES.map((stage, stageIndex) => {
               const count = templatesByStage.get(stage.id)?.length ?? 0;
               const active = stage.id === selectedStageId;
               return (
@@ -84,9 +157,13 @@ export default function QuickMenu({ inline = false }: { inline?: boolean }) {
                   key={stage.id}
                   type="button"
                   className={`quick-menu__stage${active ? " quick-menu__stage--active" : ""}`}
+                  title={`Alt+${stageIndex + 1} 选择此阶段`}
                   onClick={() => setSelectedStageId(stage.id)}
                 >
-                  <span className="quick-menu__stage-label">{stage.label}</span>
+                  <span className="quick-menu__stage-main">
+                    <kbd className="quick-menu__stage-key">{stageIndex + 1}</kbd>
+                    <span className="quick-menu__stage-label">{stage.label}</span>
+                  </span>
                   {count > 0 && <span className="quick-menu__stage-count">{count}</span>}
                 </button>
               );
@@ -96,23 +173,28 @@ export default function QuickMenu({ inline = false }: { inline?: boolean }) {
             {stagePrompts.length === 0 ? (
               <div className="quick-menu__empty">该阶段暂无提示词</div>
             ) : (
-              stagePrompts.map((t) => (
-                <div key={t.id} className="quick-menu__prompt">
+              stagePrompts.map((t, index) => (
+                <div
+                  key={t.id}
+                  className={`quick-menu__prompt${focusedIndex === index ? " quick-menu__prompt--focused" : ""}`}
+                >
                   <button
                     type="button"
                     className="quick-menu__prompt-main"
                     onClick={() => openTemplate(t.id)}
+                    onMouseEnter={() => setFocusedIndex(index)}
                   >
                     <div className="quick-menu__prompt-title">{t.title}</div>
                     {t.description && (
                       <div className="quick-menu__prompt-desc">{t.description}</div>
                     )}
                   </button>
+                  {index < 9 && <kbd className="quick-menu__prompt-key">{index + 1}</kbd>}
                   <button
                     type="button"
                     className={`quick-menu__prompt-copy${copiedId === t.id ? " quick-menu__prompt-copy--done" : ""}`}
-                    title="复制提示词"
-                    aria-label="复制提示词"
+                    title={index < 9 ? `复制 (${index + 1})` : "复制提示词"}
+                    aria-label={index < 9 ? `复制提示词，快捷键 ${index + 1}` : "复制提示词"}
                     onClick={() => copyTemplate(t)}
                   >
                     {copiedId === t.id ? "已复制" : "复制"}
@@ -122,9 +204,12 @@ export default function QuickMenu({ inline = false }: { inline?: boolean }) {
             )}
           </div>
         </div>
-        <button type="button" className="quick-menu__open" onClick={() => window.codingHelper.openMain()}>
-          打开主面板…
-        </button>
+        <div className="quick-menu__footer">
+          <span className="quick-menu__hints">Alt+1–7 阶段 · 1–9 复制 · ↑↓ 选择 · Enter / Ctrl+C 复制 · Esc 关闭</span>
+          <button type="button" className="quick-menu__open" onClick={() => window.codingHelper.openMain()}>
+            打开主面板…
+          </button>
+        </div>
       </div>
     </div>
   );
