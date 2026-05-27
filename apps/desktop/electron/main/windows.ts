@@ -17,6 +17,51 @@ let quickMenuWindow: BrowserWindow | null = null;
 
 const FLOAT_BALL_SIZE = 52;
 const SNAP_THRESHOLD = 48;
+const QUICK_MENU_WIDTH = 280;
+const QUICK_MENU_HEIGHT = 320;
+const QUICK_MENU_GAP = 8;
+const WORK_MARGIN = 8;
+const FLOAT_BALL_EXPANDED_HEIGHT = QUICK_MENU_HEIGHT + QUICK_MENU_GAP + FLOAT_BALL_SIZE;
+
+let floatBallMenuOpen = false;
+
+function resolveBallScreenOrigin(
+  ball: BrowserWindow,
+  ballScreen?: { x: number; y: number }
+): { x: number; y: number } {
+  const bounds = ball.getBounds();
+  if (!ballScreen) return { x: bounds.x, y: bounds.y };
+
+  const rendererOk = ballScreen.x > 10 || ballScreen.y > 10;
+  const boundsOk = bounds.x > 10 || bounds.y > 10;
+  if (rendererOk) return ballScreen;
+  if (boundsOk) return { x: bounds.x, y: bounds.y };
+  return ballScreen;
+}
+
+function clampExpandedWindowPosition(bx: number, by: number) {
+  const ballCenterX = bx + FLOAT_BALL_SIZE / 2;
+  const ballBottom = by + FLOAT_BALL_SIZE;
+  const display = screen.getDisplayNearestPoint({ x: ballCenterX, y: by + FLOAT_BALL_SIZE / 2 });
+  const work = display.workArea;
+
+  let x = Math.round(ballCenterX - QUICK_MENU_WIDTH / 2);
+  let y = Math.round(ballBottom - FLOAT_BALL_EXPANDED_HEIGHT);
+
+  if (y < work.y + WORK_MARGIN) {
+    y = Math.round(by + FLOAT_BALL_SIZE + QUICK_MENU_GAP);
+  }
+
+  x = Math.max(
+    work.x + WORK_MARGIN,
+    Math.min(x, work.x + work.width - QUICK_MENU_WIDTH - WORK_MARGIN)
+  );
+
+  const maxY = work.y + work.height - FLOAT_BALL_EXPANDED_HEIGHT - WORK_MARGIN;
+  y = Math.max(work.y + WORK_MARGIN, Math.min(y, maxY));
+
+  return { x, y };
+}
 
 export function getFloatBallWindow(): BrowserWindow | null {
   return floatBallWindow;
@@ -185,40 +230,51 @@ export function showFloatBall(): void {
 export function destroyQuickMenu(): void {
   quickMenuWindow?.close();
   quickMenuWindow = null;
+  if (floatBallMenuOpen) {
+    setFloatBallMenuOpen(false);
+  }
 }
 
-export function toggleQuickMenu(anchor?: { x: number; y: number }): void {
-  if (quickMenuWindow && !quickMenuWindow.isDestroyed()) {
-    destroyQuickMenu();
+export function setFloatBallMenuOpen(
+  open: boolean,
+  ball?: BrowserWindow | null,
+  ballScreen?: { x: number; y: number }
+): void {
+  const win = ball ?? floatBallWindow;
+  if (!win || win.isDestroyed()) return;
+
+  if (!open) {
+    if (!floatBallMenuOpen) return;
+    floatBallMenuOpen = false;
+    const bounds = win.getBounds();
+    const ballX = Math.round(bounds.x + (bounds.width - FLOAT_BALL_SIZE) / 2);
+    const ballY = Math.round(bounds.y + bounds.height - FLOAT_BALL_SIZE);
+    win.setResizable(true);
+    win.setBounds({ x: ballX, y: ballY, width: FLOAT_BALL_SIZE, height: FLOAT_BALL_SIZE });
+    win.setResizable(false);
+    win.webContents.send("float-ball-menu", false);
     return;
   }
 
-  const ball = floatBallWindow;
-  const [bx, by] = ball?.getPosition() ?? [100, 100];
+  if (floatBallMenuOpen) return;
 
-  quickMenuWindow = new BrowserWindow({
-    width: 280,
-    height: 320,
-    x: anchor?.x ?? bx - 220,
-    y: anchor?.y ?? by - 330,
-    frame: false,
-    transparent: true,
-    alwaysOnTop: true,
-    skipTaskbar: true,
-    resizable: false,
-    focusable: true,
-    webPreferences: {
-      preload: join(__dirname, "../preload/index.js"),
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
-  });
+  const origin = resolveBallScreenOrigin(win, ballScreen);
+  const { x, y } = clampExpandedWindowPosition(origin.x, origin.y);
 
-  quickMenuWindow.loadURL(getRendererUrl("#/quick-menu"));
-  quickMenuWindow.on("blur", () => destroyQuickMenu());
-  quickMenuWindow.on("closed", () => {
-    quickMenuWindow = null;
-  });
+  floatBallMenuOpen = true;
+  win.setResizable(true);
+  win.setBounds({ x, y, width: QUICK_MENU_WIDTH, height: FLOAT_BALL_EXPANDED_HEIGHT });
+  win.setResizable(false);
+  win.webContents.send("float-ball-menu", true);
+}
+
+export function toggleQuickMenu(ballScreen?: { x: number; y: number }): void {
+  if (floatBallMenuOpen) {
+    setFloatBallMenuOpen(false);
+    return;
+  }
+  destroyQuickMenu();
+  setFloatBallMenuOpen(true, floatBallWindow, ballScreen);
 }
 
 export function applyAlwaysOnTop(value: boolean): void {

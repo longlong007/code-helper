@@ -19,7 +19,10 @@ const api = {
   windowMinimize: () => ipcRenderer.invoke("window-minimize"),
   windowClose: () => ipcRenderer.invoke("window-close"),
   openMain: () => ipcRenderer.invoke("open-main"),
-  toggleQuickMenu: () => ipcRenderer.invoke("toggle-quick-menu"),
+  toggleQuickMenu: (ballScreen?: { x: number; y: number }) =>
+    ipcRenderer.invoke("toggle-quick-menu", ballScreen),
+  setFloatBallMenuOpen: (open: boolean, ballScreen?: { x: number; y: number }) =>
+    ipcRenderer.invoke("set-float-ball-menu-open", open, ballScreen),
   closeQuickMenu: () => ipcRenderer.invoke("close-quick-menu"),
   showFloatBall: () => ipcRenderer.invoke("show-float-ball"),
   getFloatBallPosition: () => ipcRenderer.invoke("get-float-ball-position") as Promise<{ x: number; y: number } | null>,
@@ -33,6 +36,11 @@ const api = {
     const handler = (_: unknown, ctx: unknown) => cb(ctx);
     ipcRenderer.on("context-updated", handler);
     return () => ipcRenderer.removeListener("context-updated", handler);
+  },
+  onFloatBallMenuChange: (cb: (open: boolean) => void) => {
+    const handler = (_: unknown, open: boolean) => cb(open);
+    ipcRenderer.on("float-ball-menu", handler);
+    return () => ipcRenderer.removeListener("float-ball-menu", handler);
   },
   chatStreamStart: (messages: { role: string; content: string }[]) =>
     ipcRenderer.send("chat-stream-start", { messages }),

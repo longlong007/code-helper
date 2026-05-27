@@ -9,6 +9,27 @@ body,
   background: transparent;
 }
 
+.quick-menu-root--inline {
+  padding: 0;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-menu-root--inline .quick-menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.quick-menu-root--inline .quick-menu__items {
+  flex: 1;
+  overflow-y: auto;
+}
+
 .quick-menu {
   background: var(--ch-bg-elevated);
   border: 1px solid var(--ch-border);

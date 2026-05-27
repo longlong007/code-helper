@@ -26,8 +26,10 @@ declare global {
       windowMinimize: () => Promise<void>;
       windowClose: () => Promise<void>;
       openMain: () => Promise<void>;
-      toggleQuickMenu: () => Promise<void>;
+      toggleQuickMenu: (ballScreen?: { x: number; y: number }) => Promise<void>;
+      setFloatBallMenuOpen: (open: boolean, ballScreen?: { x: number; y: number }) => Promise<void>;
       closeQuickMenu: () => Promise<void>;
+      onFloatBallMenuChange: (cb: (open: boolean) => void) => () => void;
       showFloatBall: () => Promise<void>;
       getFloatBallPosition: () => Promise<{ x: number; y: number } | null>;
       setFloatBallPosition: (x: number, y: number) => Promise<{ x: number; y: number } | null>;

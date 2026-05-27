@@ -3,11 +3,11 @@ import type { PromptTemplate } from "@coding-helper/shared";
 import { STAGES } from "@coding-helper/shared";
 import "./QuickMenu.css";
 
-export default function QuickMenu() {
+export default function QuickMenu({ inline = false }: { inline?: boolean }) {
   const [recent, setRecent] = useState<PromptTemplate[]>([]);
 
   useEffect(() => {
-    document.body.style.background = "transparent";
+    if (!inline) document.body.style.background = "transparent";
     Promise.all([
       window.codingHelper.getTemplates(),
       window.codingHelper.getSettings(),
@@ -16,9 +16,9 @@ export default function QuickMenu() {
       setRecent(ids.map((id) => templates.find((t) => t.id === id)).filter(Boolean) as PromptTemplate[]);
     });
     return () => {
-      document.body.style.background = "";
+      if (!inline) document.body.style.background = "";
     };
-  }, []);
+  }, [inline]);
 
   const openTemplate = async (id: string) => {
     await window.codingHelper.pushRecent(id);
@@ -27,7 +27,7 @@ export default function QuickMenu() {
   };
 
   return (
-    <div className="quick-menu-root">
+    <div className={`quick-menu-root${inline ? " quick-menu-root--inline" : ""}`}>
       <div className="quick-menu">
         <div className="quick-menu__header">最近使用</div>
         {recent.length === 0 && (

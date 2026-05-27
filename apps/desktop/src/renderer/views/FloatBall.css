@@ -9,14 +9,22 @@ body,
   width: 52px;
   height: 52px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   background: transparent;
+}
+
+.float-root--expanded {
+  width: 280px;
+  height: 380px;
+  gap: 8px;
 }
 
 .float-ball {
   width: 52px;
   height: 52px;
+  flex-shrink: 0;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.2);
   background: linear-gradient(145deg, #4aa3ff, #3794ff);

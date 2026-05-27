@@ -28,6 +28,7 @@ import {
   getFloatBallPosition,
   setFloatBallPosition,
   finishFloatBallDrag,
+  setFloatBallMenuOpen,
 } from "./windows";
 import { getApiKey, saveApiKey, streamChatCompletion } from "./provider";
 
@@ -170,9 +171,17 @@ export function registerIpc(): void {
     destroyQuickMenu();
   });
 
-  ipcMain.handle("toggle-quick-menu", () => {
-    toggleQuickMenu();
+  ipcMain.handle("toggle-quick-menu", (_e, ballScreen?: { x: number; y: number }) => {
+    toggleQuickMenu(ballScreen);
   });
+
+  ipcMain.handle(
+    "set-float-ball-menu-open",
+    (e, open: boolean, ballScreen?: { x: number; y: number }) => {
+      const ball = BrowserWindow.fromWebContents(e.sender);
+      setFloatBallMenuOpen(open, ball, ballScreen);
+    }
+  );
 
   ipcMain.handle("close-quick-menu", () => {
     destroyQuickMenu();
